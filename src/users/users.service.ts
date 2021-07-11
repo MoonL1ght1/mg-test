@@ -1,8 +1,15 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { FindStrictnessDto } from './dto/findStrictness.dto'
 import { User } from './entities/user.entity'
 import * as bcrypt from 'bcrypt'
+
+type findOptions = {
+  where?: { email?: string, phone?: string },
+  limit?: number,
+  offset?: number
+}
 
 @Injectable()
 export class UsersService {
@@ -19,8 +26,21 @@ export class UsersService {
     return this.usersRepository.create(newUser)
   }
 
-  async findAll(): Promise<User[]>  {
-    return this.usersRepository.findAll<User>()
+  async findAll(findStrictness: FindStrictnessDto) {
+    const { email, phone, pageSize, pageIndex } = findStrictness
+    const options: findOptions = { where: {} }
+    if (email) {
+      options.where.email = email
+    }
+    if (phone) {
+      options.where.phone = phone
+    }
+    if ((pageSize || pageSize === 0) && (pageIndex || pageIndex === 0)) {
+      options.limit = pageSize
+      options.offset = pageSize * pageIndex
+    }
+    
+    return this.usersRepository.findAndCountAll<User>(options)
   }
 
   async findOne(id: number) {

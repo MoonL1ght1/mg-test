@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from 
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { FindStrictnessDto } from './dto/findStrictness.dto'
 import { ValidationPipe } from './validator'
 
 @Controller('users')
@@ -10,26 +11,27 @@ export class UsersController {
 
   @Post()
   async create(@Body(new ValidationPipe()) createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+    return this.usersService.create(createUserDto)
   }
 
   @Get()
-  async findAll() {
-    return this.usersService.findAll();
+  async findAll(@Body(new ValidationPipe()) findStrictness: FindStrictnessDto) {
+    const { rows } = await this.usersService.findAll(findStrictness)
+    return rows
   }
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.findOne(+id);
+    return this.usersService.findOne(+id)
   }
 
   @Patch(':id')
   async update(@Param('id', ParseIntPipe) id: number, @Body(new ValidationPipe()) updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+    return this.usersService.update(+id, updateUserDto)
   }
 
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.remove(+id);
+    return this.usersService.remove(+id)
   }
 }
