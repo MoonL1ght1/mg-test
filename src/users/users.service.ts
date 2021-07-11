@@ -1,31 +1,45 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity'
+import * as bcrypt from 'bcrypt'
 
 @Injectable()
 export class UsersService {
+  constructor(
+    @Inject('USERS_REPOSITORY')
+    private usersRepository: typeof User
+  ) {}
+
   async create(createUserDto: CreateUserDto) {
-    console.log(createUserDto)
-    return 'This action adds a new user';
+    // кол-во символом рандомной соли?
+    const passwordHash: string = await bcrypt.hash(createUserDto.password, 4)
+    const newUser = {...createUserDto, passwordHash: passwordHash }
+    delete newUser.password
+    return this.usersRepository.create(newUser);
   }
 
-  async findAll() {
-    console.log('findAll')
-    return `This action returns all users`;
+  async findAll(): Promise<User[]>  {
+    return this.usersRepository.findAll<User>();
   }
 
   async findOne(id: number) {
-    console.log(id)
-    return `This action returns a #${id} user`;
+    return this.usersRepository.findByPk(id);
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    console.log(id, updateUserDto)
-    return `This action updates a #${id} user`;
+    let updateUser
+    if (updateUserDto.password) {
+      updateUser = { ...updateUserDto, passwordHash: await bcrypt.hash(updateUserDto.password, 4)}
+    } else {
+      updateUser = { ...updateUserDto }
+    }
+    delete updateUser.password
+    console.log(updateUser)
+    return this.usersRepository.update(updateUser, { where: { id }})
   }
 
   async remove(id: number) {
-    console.log(id)
-    return `This action removes a #${id} user`;
+    return this.usersRepository.destroy({ where: { id }});
   }
 }
