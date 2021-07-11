@@ -16,15 +16,15 @@ export class UsersService {
     const passwordHash: string = await bcrypt.hash(createUserDto.password, 4)
     const newUser = {...createUserDto, passwordHash: passwordHash }
     delete newUser.password
-    return this.usersRepository.create(newUser);
+    return this.usersRepository.create(newUser)
   }
 
   async findAll(): Promise<User[]>  {
-    return this.usersRepository.findAll<User>();
+    return this.usersRepository.findAll<User>()
   }
 
   async findOne(id: number) {
-    return this.usersRepository.findByPk(id);
+    return this.usersRepository.findByPk(id)
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
@@ -35,11 +35,10 @@ export class UsersService {
       updateUser = { ...updateUserDto }
     }
     delete updateUser.password
-    console.log(updateUser)
     return this.usersRepository.update(updateUser, { where: { id }})
   }
 
   async remove(id: number) {
-    return this.usersRepository.destroy({ where: { id }});
+    return this.usersRepository.destroy({ where: { id }})
   }
 }
